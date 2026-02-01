@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>AI 漫剧 Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #050816;
+        --card-bg: #0f172a;
+        --accent: #38bdf8;
+        --accent-soft: rgba(56, 189, 248, 0.15);
+        --text: #e5e7eb;
+        --text-soft: #9ca3af;
+        --border: #1f2937;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+          "Segoe UI", sans-serif;
+        background: radial-gradient(circle at top, #1f2937 0, #020617 55%);
+        color: var(--text);
+        display: flex;
+        justify-content: center;
+        padding: 32px 16px;
+      }
+      .app {
+        width: 100%;
+        max-width: 960px;
+      }
+      .card {
+        background: radial-gradient(circle at top, #020617 0, #020617 55%);
+        border-radius: 24px;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        box-shadow: 0 24px 80px rgba(15, 23, 42, 0.9);
+        padding: 24px 24px 28px;
+        backdrop-filter: blur(18px);
+      }
+      .hero {
+        text-align: center;
+        margin-bottom: 24px;
+      }
+      .hero-title-cn {
+        font-size: 36px;
+        font-weight: 800;
+        letter-spacing: 0.18em;
+        text-indent: 0.18em;
+        background: linear-gradient(120deg, #a5b4fc, #38bdf8, #22d3ee);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        margin-bottom: 6px;
+      }
+      .hero-title-en {
+        font-size: 11px;
+        letter-spacing: 0.36em;
+        text-transform: uppercase;
+        color: rgba(148, 163, 184, 0.85);
+        margin-bottom: 12px;
+      }
+      .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(56, 189, 248, 0.6);
+        background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), #020617);
+        font-size: 11px;
+        color: #bae6fd;
+      }
+      .hero-badge-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 999px;
+        background: #22c55e;
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.25);
+      }
+      .title {
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 6px;
+      }
+      .title-pill {
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        border: 1px solid rgba(56, 189, 248, 0.45);
+        background: radial-gradient(circle at top, #0f172a, #020617);
+        color: var(--accent);
+      }
+      .subtitle {
+        font-size: 14px;
+        color: var(--text-soft);
+        margin-bottom: 18px;
+      }
+      .scene-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 14px;
+        margin-bottom: 22px;
+      }
+      .scene-card {
+        border-radius: 18px;
+        border: 1px solid rgba(30, 64, 175, 0.8);
+        background: radial-gradient(circle at top left, #020617, #020617);
+        padding: 14px 14px 12px;
+        cursor: pointer;
+        transition: transform 0.12s ease, box-shadow 0.16s ease,
+          border-color 0.16s ease, background 0.16s ease;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .scene-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 16px 45px rgba(15, 23, 42, 0.9);
+        border-color: rgba(56, 189, 248, 0.95);
+        background: radial-gradient(circle at top left, #0b1120, #020617);
+      }
+      .scene-emoji {
+        font-size: 22px;
+        margin-bottom: 4px;
+      }
+      .scene-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: #38bdf8;
+      }
+      .scene-desc {
+        font-size: 12px;
+        color: var(--text-soft);
+      }
+      .form-row {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      .field-group {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      label {
+        font-size: 12px;
+        color: var(--text-soft);
+        margin-bottom: 4px;
+        display: inline-block;
+      }
+      input,
+      select,
+      button,
+      textarea {
+        font: inherit;
+      }
+      .input,
+      .select,
+      .textarea {
+        width: 100%;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: radial-gradient(circle at top left, #020617, #020617);
+        color: var(--text);
+        padding: 8px 14px;
+        font-size: 13px;
+        outline: none;
+        transition: border-color 0.18s ease, box-shadow 0.18s ease,
+          background 0.18s ease, transform 0.08s ease;
+      }
+      .textarea {
+        border-radius: 14px;
+        min-height: 64px;
+        resize: vertical;
+        line-height: 1.5;
+      }
+      .input:focus,
+      .select:focus,
+      .textarea:focus {
+        border-color: rgba(56, 189, 248, 0.8);
+        box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
+      }
+      .select {
+        appearance: none;
+        padding-right: 28px;
+        position: relative;
+        background-image: linear-gradient(45deg, transparent 50%, #64748b 50%),
+          linear-gradient(135deg, #64748b 50%, transparent 50%);
+        background-position: calc(100% - 14px) 12px, calc(100% - 9px) 12px;
+        background-size: 5px 5px, 5px 5px;
+        background-repeat: no-repeat;
+      }
+      .button-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 4px;
+      }
+      .button {
+        border-radius: 999px;
+        border: none;
+        padding: 8px 18px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: radial-gradient(circle at top left, #38bdf8, #0ea5e9);
+        color: #0b1220;
+        box-shadow: 0 14px 35px rgba(56, 189, 248, 0.35);
+        transition: transform 0.08s ease, box-shadow 0.08s ease,
+          filter 0.12s ease;
+      }
+      .button span.icon {
+        font-size: 14px;
+      }
+      .button:disabled {
+        opacity: 0.6;
+        cursor: default;
+        box-shadow: none;
+        transform: none;
+      }
+      .button:not(:disabled):hover {
+        transform: translateY(-1px);
+        filter: brightness(1.02);
+      }
+      .button:not(:disabled):active {
+        transform: translateY(0);
+        box-shadow: 0 10px 24px rgba(56, 189, 248, 0.28);
+      }
+      .hint {
+        font-size: 11px;
+        color: var(--text-soft);
+      }
+      .status {
+        min-height: 20px;
+        font-size: 12px;
+        margin-top: 4px;
+      }
+      .status--loading {
+        color: var(--accent);
+      }
+      .status--error {
+        color: #fca5a5;
+      }
+      .status--success {
+        color: #4ade80;
+      }
+      .episode {
+        margin-top: 22px;
+        border-top: 1px dashed rgba(148, 163, 184, 0.4);
+        padding-top: 18px;
+      }
+      .episode-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      .episode-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+      .episode-desc {
+        font-size: 12px;
+        color: var(--text-soft);
+      }
+      .pill {
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        border: 1px solid rgba(148, 163, 184, 0.5);
+        color: var(--text-soft);
+      }
+      .frames-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 14px;
+      }
+      .frame-card {
+        border-radius: 16px;
+        border: 1px solid rgba(30, 64, 175, 0.65);
+        background: radial-gradient(circle at top left, #020617, #020617);
+        padding: 10px 10px 11px;
+        position: relative;
+        overflow: hidden;
+      }
+      .frame-index {
+        position: absolute;
+        top: 8px;
+        left: 9px;
+        font-size: 11px;
+        color: rgba(148, 163, 184, 0.85);
+      }
+      .frame-image {
+        border-radius: 12px;
+        border: 1px solid rgba(51, 65, 85, 0.9);
+        background: linear-gradient(135deg, #020617, #020617);
+        height: 108px;
+        margin-top: 14px;
+        margin-bottom: 8px;
+        padding: 8px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: flex-start;
+      }
+      .frame-image-text {
+        font-size: 11px;
+        color: var(--text-soft);
+        line-height: 1.5;
+      }
+      .frame-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 4px;
+      }
+      .frame-speaker {
+        font-size: 12px;
+        font-weight: 500;
+      }
+      .frame-mood {
+        font-size: 11px;
+        color: #fde68a;
+      }
+      .frame-dialogue {
+        font-size: 12px;
+        margin-bottom: 2px;
+      }
+      .frame-narration {
+        font-size: 11px;
+        color: var(--text-soft);
+      }
+      .frame-audio-row {
+        margin-top: 6px;
+        display: flex;
+        justify-content: flex-end;
+      }
+      .frame-audio-btn {
+        border-radius: 999px;
+        border: none;
+        padding: 2px 9px 3px;
+        font-size: 11px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: rgba(56, 189, 248, 0.1);
+        color: var(--accent);
+        transition: background 0.12s ease, transform 0.08s ease;
+      }
+      .frame-audio-btn span.icon {
+        font-size: 12px;
+      }
+      .frame-audio-btn:hover {
+        background: rgba(56, 189, 248, 0.2);
+        transform: translateY(-0.5px);
+      }
+
+      .dialog-card {
+        margin-top: 18px;
+        border-radius: 18px;
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        padding: 12px 12px 14px;
+        background: radial-gradient(circle at top left, #020617, #020617);
+      }
+      .dialog-title {
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 6px;
+      }
+      .dialog-input-row {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .dialog-textarea {
+        width: 100%;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: radial-gradient(circle at top left, #020617, #020617);
+        color: var(--text);
+        padding: 8px 10px;
+        font-size: 13px;
+        outline: none;
+        resize: vertical;
+        min-height: 48px;
+      }
+      .dialog-textarea:focus {
+        border-color: rgba(56, 189, 248, 0.8);
+        box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
+      }
+      .dialog-button-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .dialog-log {
+        margin-top: 8px;
+        max-height: 160px;
+        overflow-y: auto;
+        font-size: 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(30, 64, 175, 0.7);
+        padding: 6px 8px;
+        background: rgba(15, 23, 42, 0.7);
+      }
+      .dialog-line {
+        margin-bottom: 4px;
+      }
+      .dialog-line span.role {
+        font-weight: 500;
+        margin-right: 4px;
+      }
+
+      @media (max-width: 640px) {
+        body {
+          padding: 16px 10px;
+        }
+        .card {
+          padding: 16px 14px 20px;
+          border-radius: 18px;
+        }
+        .title {
+          font-size: 22px;
+          flex-wrap: wrap;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <div class="card">
+        <div class="hero">
+          <div class="hero-title-cn">声临其境</div>
+          <div class="hero-title-en">AI INTERACTIVE AUDIO COMIC THEATER</div>
+          <div class="hero-badge">
+            <span class="hero-badge-dot"></span>
+            真实时语音版 · 带有 TTS 朗读
+          </div>
+        </div>
+
+        <div class="subtitle">
+          点击下方任意场景卡片，AI 将为你生成独特的互动漫剧故事，自动朗读每一格分镜。
+        </div>
+
+        <!-- 场景选择区 -->
+        <div class="scene-grid">
+          <div
+            class="scene-card"
+            onclick="selectScene('赛博侦探', '未来都市的谜案调查，AI助手与你并肩破案。', '赛博朋克', '轻悬疑')"
+          >
+            <div class="scene-emoji">🕵️‍♂️</div>
+            <div class="scene-title">赛博侦探</div>
+            <div class="scene-desc">
+              霓虹都市、黑客线索与失控 AI，在边缘地带查出真相。
+            </div>
+          </div>
+
+          <div
+            class="scene-card"
+            onclick="selectScene('星际邂逅', '跨越星系的擦肩与重逢，每一次决定都改变命运轨迹。', '星际恋歌', '治愈')"
+          >
+            <div class="scene-emoji">💫</div>
+            <div class="scene-title">星际邂逅</div>
+            <div class="scene-desc">
+              在宇宙边缘漂流的飞船上，重新定义“距离”和“亲密”。
+            </div>
+          </div>
+
+          <div
+            class="scene-card"
+            onclick="selectScene('星际探险', '探索未知星球，每一次选择都在改写宇宙规则。', '星际探险', '热血')"
+          >
+            <div class="scene-emoji">🚀</div>
+            <div class="scene-title">星际探险</div>
+            <div class="scene-desc">
+              降落在无人标记的星球，脚下的每一块石头都可能藏着秘密。
+            </div>
+          </div>
+
+          <div
+            class="scene-card"
+            onclick="selectScene('午夜传说', '都市深夜电台，每个故事都介于真实与传说之间。', '都市怪谈', '轻悬疑')"
+          >
+            <div class="scene-emoji">🌙</div>
+            <div class="scene-title">午夜传说</div>
+            <div class="scene-desc">
+              你和电台另一端的 TA，一起拨开层层迷雾，靠近真相。
+            </div>
+          </div>
+        </div>
+
+        <!-- 隐藏的原始输入控件，用于驱动后端逻辑 -->
+        <div class="form-row" style="display: none">
+          <div>
+            <label for="prompt">一句话设定</label>
+            <textarea
+              id="prompt"
+              class="textarea"
+              placeholder="例如：一个倒霉的实习生第一天上班就遇到了灵异事件"
+            ></textarea>
+          </div>
+
+          <div class="field-group">
+            <div style="flex: 1 1 160px">
+              <label for="world_view">世界观 / 风格（可选）</label>
+              <select id="world_view" class="select">
+                <option value="">自动</option>
+                <option value="都市职场">都市职场</option>
+                <option value="校园奇谈">校园奇谈</option>
+                <option value="赛博朋克">赛博朋克</option>
+                <option value="武侠江湖">武侠江湖</option>
+              </select>
+            </div>
+            <div style="flex: 1 1 140px">
+              <label for="tone">基调（可选）</label>
+              <select id="tone" class="select">
+                <option value="">自动</option>
+                <option value="搞笑">搞笑</option>
+                <option value="轻悬疑">轻悬疑</option>
+                <option value="热血">热血</option>
+                <option value="治愈">治愈</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="button-row" style="display:none">
+          <button id="generate_btn" class="button">
+            <span class="icon">🎬</span>
+            生成一集短漫
+          </button>
+          <div class="hint">
+            小贴士：先用默认假数据跑通，后面我们再一起接入真实大模型。
+          </div>
+        </div>
+
+        <div id="status" class="status"></div>
+
+        <div id="episode_container" class="episode" style="display: none"></div>
+
+        <div class="dialog-card">
+          <div class="dialog-title">🎭 宇宙悬疑 · 女主对话模式（音频互动版）</div>
+          <div class="dialog-input-row">
+            <textarea
+              id="dialog_input"
+              class="dialog-textarea"
+              placeholder="对她说点什么，例如：继续昨天那个宇宙悬疑故事，但今天我想让你更狠一点。"
+            ></textarea>
+          </div>
+          <div class="dialog-button-row" style="flex-wrap:wrap;gap:8px">
+            <button id="dialog_send_btn" class="button" style="padding:6px 14px;font-size:12px">
+              <span class="icon">✍️</span>
+              发送文字
+            </button>
+            <button 
+              id="voice_record_btn" 
+              class="button" 
+              style="padding:6px 14px;font-size:12px;background:radial-gradient(circle at top left, #ef4444, #dc2626);box-shadow:0 14px 35px rgba(239, 68, 68, 0.35);"
+              onmousedown="startVoiceRecording()"
+              onmouseup="stopVoiceRecording()"
+              ontouchstart="startVoiceRecording(); return false;"
+              ontouchend="stopVoiceRecording(); return false;"
+            >
+              <span class="icon" id="voice_icon">🎤</span>
+              <span id="voice_btn_text">按住说话</span>
+            </button>
+            <button 
+              id="interrupt_btn" 
+              class="button" 
+              style="padding:6px 14px;font-size:12px;background:radial-gradient(circle at top left, #f59e0b, #d97706);box-shadow:0 14px 35px rgba(245, 158, 11, 0.35);display:none;"
+              onclick="interruptAndSpeak()"
+            >
+              <span class="icon">⏸️</span>
+              打断并说话
+            </button>
+          </div>
+          <div class="hint" style="margin-top:4px">
+            💡 <strong>音频互动</strong>：按住「按住说话」按钮，说出你的话，AI 会立即停止当前播放并回应你。故事播放时，按钮会变成「打断并说话」。
+          </div>
+          <div id="dialog_log" class="dialog-log" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 使用 var 声明全局变量，避免 TDZ (Temporal Dead Zone) 错误
+      // var 会被提升到作用域顶部，不会有初始化顺序问题
+      var currentEpisode = null;
+      var currentUtterance = null;
+      var dialogHistory = [];
+      var autoPlayQueue = [];
+      var isAutoPlaying = false;
+      var recognition = null;
+      var isRecording = false;
+      var voiceRecordBtn = null;
+      var interruptBtn = null;
+      
+      // 多分支故事系统：记录选择历史和故事路径
+      var choiceHistory = [];  // 用户做过的所有选择
+      var branchDepth = 0;     // 当前分支深度（第几次选择）
+      var storyPath = [];      // 完整的故事路径（用于生成不同结局）
+
+      // 然后初始化 DOM 元素和常量
+      const API_BASE = "http://127.0.0.1:8000";
+      const promptInput = document.getElementById("prompt");
+      const worldSelect = document.getElementById("world_view");
+      const toneSelect = document.getElementById("tone");
+      const generateBtn = document.getElementById("generate_btn");
+      const statusEl = document.getElementById("status");
+      const episodeContainer = document.getElementById("episode_container");
+      const dialogInput = document.getElementById("dialog_input");
+      const dialogSendBtn = document.getElementById("dialog_send_btn");
+      const dialogLogEl = document.getElementById("dialog_log");
+      
+      // 初始化按钮引用
+      voiceRecordBtn = document.getElementById("voice_record_btn");
+      interruptBtn = document.getElementById("interrupt_btn");
+      
+      // 初始化语音识别（如果浏览器支持）
+      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.lang = 'zh-CN';
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        
+        recognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          if (transcript.trim()) {
+            dialogInput.value = transcript;
+            // 自动发送
+            sendDialogTurn();
+          }
+        };
+        
+        recognition.onerror = (event) => {
+          console.error('语音识别错误:', event.error);
+          setStatus(`语音识别失败: ${event.error}`, "error");
+          isRecording = false;
+          updateVoiceButtonState();
+        };
+        
+        recognition.onend = () => {
+          isRecording = false;
+          updateVoiceButtonState();
+        };
+        
+        // 预先请求麦克风权限，避免每次点击都弹窗
+        // 使用 getUserMedia 先获取权限，这样后续 SpeechRecognition 就不会再弹窗
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          navigator.mediaDevices.getUserMedia({ audio: true })
+            .then((stream) => {
+              // 权限已获取，立即关闭流（我们只需要权限，不需要实际使用这个流）
+              stream.getTracks().forEach(track => track.stop());
+              console.log('麦克风权限已预先获取');
+            })
+            .catch((err) => {
+              console.warn('预先获取麦克风权限失败（不影响后续使用）:', err);
+              // 这里不显示错误，因为用户可能还没准备好授权
+              // 等用户真正点击按钮时再处理
+            });
+        }
+      }
+      
+      function updateVoiceButtonState() {
+        if (!voiceRecordBtn) return;
+        if (isRecording) {
+          voiceRecordBtn.style.background = 'radial-gradient(circle at top left, #ef4444, #dc2626)';
+          voiceRecordBtn.style.boxShadow = '0 14px 35px rgba(239, 68, 68, 0.5)';
+          document.getElementById('voice_icon').textContent = '🔴';
+          document.getElementById('voice_btn_text').textContent = '正在录音...';
+        } else {
+          voiceRecordBtn.style.background = 'radial-gradient(circle at top left, #ef4444, #dc2626)';
+          voiceRecordBtn.style.boxShadow = '0 14px 35px rgba(239, 68, 68, 0.35)';
+          document.getElementById('voice_icon').textContent = '🎤';
+          document.getElementById('voice_btn_text').textContent = '按住说话';
+        }
+      }
+      
+      async function startVoiceRecording() {
+        if (!recognition) {
+          setStatus("当前浏览器不支持语音识别，请使用 Chrome/Edge 浏览器。", "error");
+          return;
+        }
+        
+        if (isRecording) return;
+        
+        // 如果正在播放，先停止
+        if (isAutoPlaying || window.speechSynthesis.speaking) {
+          stopSpeaking();
+        }
+        
+        // 确保麦克风权限已获取（避免每次弹窗）
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          try {
+            // 先获取权限（如果还没获取的话）
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            // 立即关闭流（我们只需要权限，不需要实际使用这个流）
+            stream.getTracks().forEach(track => track.stop());
+          } catch (err) {
+            // 如果权限被拒绝，提示用户
+            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+              setStatus("需要麦克风权限才能使用语音功能，请在浏览器设置中允许麦克风访问。", "error");
+              return;
+            }
+            console.warn('获取麦克风权限时出错:', err);
+            // 继续尝试启动识别（可能权限已经获取了）
+          }
+        }
+        
+        try {
+          recognition.start();
+          isRecording = true;
+          updateVoiceButtonState();
+          setStatus("🎤 正在听你说话…", "loading");
+        } catch (e) {
+          console.error('启动语音识别失败:', e);
+          isRecording = false;
+          updateVoiceButtonState();
+          if (e.message && e.message.includes('not-allowed')) {
+            setStatus("麦克风权限被拒绝，请检查浏览器设置。", "error");
+          }
+        }
+      }
+      
+      function stopVoiceRecording() {
+        if (recognition && isRecording) {
+          recognition.stop();
+          isRecording = false;
+          updateVoiceButtonState();
+        }
+      }
+      
+      function interruptAndSpeak() {
+        // 停止当前播放
+        stopSpeaking();
+        // 开始录音
+        startVoiceRecording();
+      }
+
+      function selectScene(title, prompt, world_view, tone) {
+        // 设置隐藏表单的值，便于复用后端接口
+        promptInput.value = prompt;
+        worldSelect.value = world_view || "";
+        toneSelect.value = tone || "";
+
+        // 更新状态栏提示
+        setStatus(`已选择场景「${title}」，正在生成故事…`, "loading");
+
+        // 触发生成逻辑
+        generateEpisode();
+      }
+
+      function setStatus(text, type) {
+        statusEl.textContent = text || "";
+        statusEl.className = "status";
+        if (type) {
+          statusEl.classList.add(`status--${type}`);
+        }
+      }
+
+      async function generateEpisode() {
+        const prompt = promptInput.value.trim();
+        const world_view = worldSelect.value || null;
+        const tone = toneSelect.value || null;
+
+        if (!prompt) {
+          setStatus("请先输入一句话设定。", "error");
+          promptInput.focus();
+          return;
+        }
+
+        generateBtn.disabled = true;
+        setStatus("正在生成短漫分镜，请稍候…", "loading");
+
+        try {
+          const resp = await fetch(`${API_BASE}/generate_episode`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ prompt, world_view, tone }),
+          });
+
+          if (!resp.ok) {
+            const text = await resp.text();
+            console.error("HTTP 错误:", resp.status, text);
+            throw new Error(`HTTP ${resp.status}: ${text}`);
+          }
+
+          const data = await resp.json();
+          console.log("收到响应数据:", data);
+          
+          // 验证响应格式
+          if (!data || !Array.isArray(data.frames)) {
+            console.error("响应格式错误，缺少 frames 字段:", data);
+            throw new Error("后端返回的数据格式不正确，缺少 frames 字段");
+          }
+          
+          currentEpisode = data;
+          
+          // 重置选择历史（新故事开始）
+          choiceHistory = [];
+          branchDepth = 0;
+          storyPath = [];
+          
+          renderEpisode(data);
+          setStatus("生成完成，开始自动播放…", "success");
+          
+          // 自动播放所有分镜
+          setTimeout(() => {
+            autoPlayAllFrames(0);
+          }, 500);
+        } catch (err) {
+          console.error("生成失败:", err);
+          console.error("错误详情:", err.message, err.stack);
+          setStatus(`生成失败: ${err.message || "请检查后端是否已启动（端口 8000）或稍后重试"}`, "error");
+        } finally {
+          generateBtn.disabled = false;
+        }
+      }
+
+      function renderEpisode(ep) {
+        if (!ep || !Array.isArray(ep.frames)) {
+          episodeContainer.style.display = "none";
+          episodeContainer.innerHTML = "";
+          return;
+        }
+
+        const headerHtml = `
+          <div class="episode-header">
+            <div>
+              <div class="episode-title">${escapeHtml(ep.title || "AI 漫剧")}</div>
+              <div class="episode-desc">${escapeHtml(
+                ep.description || ""
+              )}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="pill">共 ${ep.frames.length} 格</div>
+              ${isAutoPlaying ? `
+                <button class="button" style="padding:4px 10px;font-size:11px" onclick="stopSpeaking()">
+                  <span class="icon">⏹️</span>停止播放
+                </button>
+              ` : `
+                <button class="button" style="padding:4px 10px;font-size:11px" onclick="autoPlayAllFrames(0)">
+                  <span class="icon">▶️</span>自动播放
+                </button>
+              `}
+            </div>
+          </div>
+        `;
+
+        const framesHtml = ep.frames
+          .map((f, idx) => {
+            return `
+              <div class="frame-card">
+                <div class="frame-index">#${f.index}</div>
+                <div class="frame-image">
+                  <div class="frame-image-text">
+                    ${escapeHtml(f.image_prompt || "")}
+                  </div>
+                </div>
+                <div class="frame-meta">
+                  <div class="frame-speaker">${escapeHtml(
+                    f.speaker || "角色"
+                  )}</div>
+                  ${
+                    f.mood
+                      ? `<div class="frame-mood">${escapeHtml(f.mood)}</div>`
+                      : ""
+                  }
+                </div>
+                <div class="frame-dialogue">「${escapeHtml(
+                  f.dialogue || ""
+                )}」</div>
+                ${
+                  f.narration
+                    ? `<div class="frame-narration">${escapeHtml(
+                        f.narration
+                      )}</div>`
+                    : ""
+                }
+                <div class="frame-audio-row">
+                  <button class="frame-audio-btn" onclick="onPlayFrameTTS(${idx})">
+                    <span class="icon">🔊</span>
+                    听这一格
+                  </button>
+                </div>
+              </div>
+            `;
+          })
+          .join("");
+
+        let choicesHtml = "";
+        if (Array.isArray(ep.choices) && ep.choices.length > 0) {
+          const buttons = ep.choices
+            .map(
+              (c, idx) =>
+                `<button class="button" style="padding:6px 14px;font-size:12px" onclick="onChoiceClick(${idx})">
+                  <span class="icon">✨</span>${escapeHtml(c)}
+                 </button>`
+            )
+            .join("&nbsp;");
+
+          // 如果分支深度>=3，添加"生成另一个结局"按钮
+          let alternativeEndingBtn = "";
+          if (branchDepth >= 3) {
+            alternativeEndingBtn = `
+              <div style="margin-top:12px;padding-top:12px;border-top:1px dashed rgba(148,163,184,0.3)">
+                <div class="episode-desc" style="margin-bottom:6px">
+                  💡 想看看如果走另一条路会怎样？生成一个完全不同的结局。
+                </div>
+                <div class="button-row" style="flex-wrap:wrap;gap:8px">
+                  <button class="button" style="padding:6px 14px;font-size:12px;background:radial-gradient(circle at top left, #f59e0b, #d97706);box-shadow:0 14px 35px rgba(245, 158, 11, 0.35);" onclick="generateAlternativeEnding('恶人有恶报')">
+                    <span class="icon">⚖️</span>恶人有恶报
+                  </button>
+                  <button class="button" style="padding:6px 14px;font-size:12px;background:radial-gradient(circle at top left, #ef4444, #dc2626);box-shadow:0 14px 35px rgba(239, 68, 68, 0.35);" onclick="generateAlternativeEnding('恶人活到最后')">
+                    <span class="icon">😈</span>恶人活到最后
+                  </button>
+                  <button class="button" style="padding:6px 14px;font-size:12px;background:radial-gradient(circle at top left, #8b5cf6, #7c3aed);box-shadow:0 14px 35px rgba(139, 92, 246, 0.35);" onclick="generateAlternativeEnding('开放式结局')">
+                    <span class="icon">🌌</span>开放式结局
+                  </button>
+                </div>
+              </div>
+            `;
+          }
+          
+          choicesHtml = `
+            <div style="margin-top:16px">
+              <div class="episode-desc" style="margin-bottom:6px">
+                你会怎么选？选择一个分支，让 AI 为你续写完整的故事段落。
+                ${branchDepth > 0 ? `<br><small style="color:var(--text-soft);">当前路径：${storyPath.join(' → ')}</small>` : ''}
+              </div>
+              <div class="button-row" style="flex-wrap:wrap;gap:8px">
+                ${buttons}
+              </div>
+              ${alternativeEndingBtn}
+            </div>
+          `;
+        }
+
+        episodeContainer.innerHTML =
+          headerHtml +
+          `<div class="frames-grid">${framesHtml}</div>` +
+          choicesHtml;
+        episodeContainer.style.display = "block";
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      generateBtn.addEventListener("click", generateEpisode);
+
+      function stopSpeaking() {
+        if (window.speechSynthesis) {
+          window.speechSynthesis.cancel();
+        }
+        currentUtterance = null;
+        autoPlayQueue = [];
+        isAutoPlaying = false;
+        // 隐藏"打断并说话"按钮
+        if (interruptBtn) {
+          interruptBtn.style.display = 'none';
+        }
+        // 如果当前有 episode，重新渲染以更新按钮状态
+        try {
+          if (typeof currentEpisode !== 'undefined' && currentEpisode) {
+            renderEpisode(currentEpisode);
+          }
+        } catch (e) {
+          console.warn('stopSpeaking: currentEpisode 未初始化', e);
+        }
+        setStatus("已停止播放。", "");
+      }
+
+      // 自动按顺序播放所有分镜
+      function autoPlayAllFrames(startIndex = 0) {
+        try {
+          if (typeof currentEpisode === 'undefined' || !currentEpisode || !Array.isArray(currentEpisode.frames)) {
+            return;
+          }
+        } catch (e) {
+          console.warn('autoPlayAllFrames: currentEpisode 未初始化', e);
+          return;
+        }
+
+        const frames = currentEpisode.frames;
+        if (startIndex >= frames.length) {
+          isAutoPlaying = false;
+          setStatus("故事播放完成。", "success");
+          // 更新渲染以显示"自动播放"按钮
+          if (currentEpisode) {
+            renderEpisode(currentEpisode);
+          }
+          return;
+        }
+
+        isAutoPlaying = true;
+        // 显示"打断并说话"按钮
+        if (interruptBtn) {
+          interruptBtn.style.display = 'inline-flex';
+        }
+        
+        const frame = frames[startIndex];
+        if (!frame) {
+          autoPlayAllFrames(startIndex + 1);
+          return;
+        }
+
+        // 只停止当前播放，不重置 isAutoPlaying
+        if (window.speechSynthesis) {
+          window.speechSynthesis.cancel();
+        }
+        currentUtterance = null;
+
+        const speaker = frame.speaker || "旁白";
+        const dialogue = frame.dialogue || "";
+        const narration = frame.narration || "";
+
+        const text =
+          (speaker ? speaker + "：" : "") +
+          dialogue +
+          (narration ? "。" + narration : "");
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "zh-CN";
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+        currentUtterance = utterance;
+
+        // 播放完成后自动播放下一格
+        utterance.onend = () => {
+          // 短暂停顿后播放下一格
+          setTimeout(() => {
+            if (isAutoPlaying) {
+              autoPlayAllFrames(startIndex + 1);
+            }
+          }, 300);
+        };
+
+        utterance.onerror = () => {
+          // 出错也继续播放下一格
+          setTimeout(() => {
+            if (isAutoPlaying) {
+              autoPlayAllFrames(startIndex + 1);
+            }
+          }, 300);
+        };
+
+        window.speechSynthesis.speak(utterance);
+        setStatus(`正在播放第 ${startIndex + 1}/${frames.length} 格…`, "loading");
+      }
+
+      function onPlayFrameTTS(index) {
+        if (
+          !("speechSynthesis" in window) ||
+          typeof SpeechSynthesisUtterance === "undefined"
+        ) {
+          setStatus("当前浏览器不支持语音朗读功能。", "error");
+          return;
+        }
+
+        if (!currentEpisode || !Array.isArray(currentEpisode.frames)) return;
+        const frame = currentEpisode.frames[index];
+        if (!frame) return;
+
+        stopSpeaking();
+
+        const speaker = frame.speaker || "旁白";
+        const dialogue = frame.dialogue || "";
+        const narration = frame.narration || "";
+
+        const text =
+          (speaker ? speaker + "：" : "") +
+          dialogue +
+          (narration ? "。" + narration : "");
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "zh-CN";
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+        currentUtterance = utterance;
+        
+        // 显示"打断并说话"按钮
+        if (interruptBtn) {
+          interruptBtn.style.display = 'inline-flex';
+        }
+        
+        utterance.onend = () => {
+          if (interruptBtn) {
+            interruptBtn.style.display = 'none';
+          }
+        };
+
+        window.speechSynthesis.speak(utterance);
+      }
+
+      async function sendDialogTurn() {
+        const utter = dialogInput.value.trim();
+        if (!utter) {
+          setStatus("请先输入你想对她说的话。", "error");
+          dialogInput.focus();
+          return;
+        }
+        dialogSendBtn.disabled = true;
+        setStatus("女主正在思考你的话…", "loading");
+
+        try {
+          const payload = {
+            utterance: utter,
+            world_view: worldSelect.value || "宇宙悬疑",
+            tone: toneSelect.value || "轻悬疑",
+            history: dialogHistory,
+          };
+
+          const resp = await fetch(`${API_BASE}/voice_round`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+          });
+
+          if (!resp.ok) {
+            const text = await resp.text();
+            throw new Error(`HTTP ${resp.status}: ${text}`);
+          }
+
+          const data = await resp.json();
+          const reply = data.reply || "";
+          const speaker = data.speaker || "女主";
+
+          dialogHistory.push({ role: "user", content: utter });
+          dialogHistory.push({ role: "assistant", content: reply });
+          renderDialogLog();
+
+          // 用浏览器语音读出回复
+          if ("speechSynthesis" in window && typeof SpeechSynthesisUtterance !== "undefined") {
+            stopSpeaking();
+            // 显示"打断并说话"按钮，因为女主正在说话
+            if (interruptBtn) {
+              interruptBtn.style.display = 'inline-flex';
+            }
+            
+            const utt = new SpeechSynthesisUtterance(reply);
+            utt.lang = "zh-CN";
+            utt.rate = 1.0;
+            utt.pitch = 1.0;
+            currentUtterance = utt;
+            
+            // 播放结束时隐藏按钮
+            utt.onend = () => {
+              if (interruptBtn) {
+                interruptBtn.style.display = 'none';
+              }
+            };
+            
+            window.speechSynthesis.speak(utt);
+          }
+
+          dialogInput.value = "";
+          setStatus("她已经回应你了。", "success");
+        } catch (err) {
+          console.error(err);
+          setStatus("对话失败，请稍后重试。", "error");
+        } finally {
+          dialogSendBtn.disabled = false;
+        }
+      }
+
+      function renderDialogLog() {
+        if (!dialogHistory.length) {
+          dialogLogEl.style.display = "none";
+          dialogLogEl.innerHTML = "";
+          return;
+        }
+        const html = dialogHistory
+          .map((turn) => {
+            const roleLabel = turn.role === "assistant" ? "女主" : "你";
+            return `<div class="dialog-line"><span class="role">${escapeHtml(
+              roleLabel
+            )}</span>${escapeHtml(turn.content || "")}</div>`;
+          })
+          .join("");
+        dialogLogEl.innerHTML = html;
+        dialogLogEl.style.display = "block";
+        dialogLogEl.scrollTop = dialogLogEl.scrollHeight;
+      }
+
+      dialogSendBtn.addEventListener("click", sendDialogTurn);
+
+      async function onChoiceClick(index) {
+        if (!currentEpisode || !Array.isArray(currentEpisode.choices)) {
+          return;
+        }
+        const choice = currentEpisode.choices[index];
+        if (!choice) return;
+
+        // 记录选择历史
+        choiceHistory.push(choice);
+        branchDepth += 1;
+        storyPath.push(choice);
+
+        const prompt = promptInput.value.trim();
+        const world_view = worldSelect.value || null;
+        const tone = toneSelect.value || null;
+
+        const story_outline = (currentEpisode.frames || [])
+          .map((f) => `${f.speaker}: ${f.dialogue}`)
+          .join("\n");
+
+        const choiceText = branchDepth === 1 ? "第一次" : branchDepth === 2 ? "第二次" : "最后一次";
+        setStatus(`正在根据你的选择续写完整的故事段落（${choiceText}选择）…`, "loading");
+
+        try {
+          const resp = await fetch(`${API_BASE}/generate_branch_episode`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              prompt,
+              world_view,
+              tone,
+              choice,
+              story_outline,
+              choice_history: choiceHistory.slice(0, -1), // 不包括当前选择
+              branch_depth: branchDepth,
+            }),
+          });
+
+          if (!resp.ok) {
+            const text = await resp.text();
+            throw new Error(`HTTP ${resp.status}: ${text}`);
+          }
+
+          const data = await resp.json();
+          const newFrames = data.frames || [];
+          const newChoices = data.choices || [];
+
+          // 给新追加的分镜重新编号，接在原有格子之后
+          const baseIndex = (currentEpisode.frames || []).length;
+          newFrames.forEach((f, i) => {
+            f.index = baseIndex + i + 1;
+          });
+
+          currentEpisode.frames = [...currentEpisode.frames, ...newFrames];
+          
+          // 更新选择点：使用AI生成的新选择点（如果有）
+          if (branchDepth >= 3) {
+            // 第三次选择后，故事结束，不再显示选择按钮
+            currentEpisode.choices = [];
+            setStatus("故事结局已生成，开始播放完整结局…", "success");
+          } else if (newChoices.length > 0) {
+            // 前两次选择后，使用AI生成的新选择点
+            currentEpisode.choices = newChoices;
+            setStatus("故事段落已生成，请做出下一个选择…", "success");
+          } else {
+            // 如果没有生成新选择点，清除选择按钮
+            currentEpisode.choices = [];
+            setStatus("故事段落已生成，继续播放…", "success");
+          }
+          
+          renderEpisode(currentEpisode);
+          
+          // 从新生成的格开始自动播放
+          const startIndex = baseIndex;
+          setTimeout(() => {
+            autoPlayAllFrames(startIndex);
+          }, 500);
+        } catch (err) {
+          console.error(err);
+          setStatus("分支续写失败，请稍后重试。", "error");
+        }
+      }
+      
+      // 生成另一个结局
+      async function generateAlternativeEnding(targetOutcome) {
+        if (!currentEpisode) {
+          setStatus("请先生成一个故事。", "error");
+          return;
+        }
+        
+        const prompt = promptInput.value.trim();
+        const world_view = worldSelect.value || null;
+        const tone = toneSelect.value || null;
+        
+        setStatus(`正在生成「${targetOutcome}」结局…`, "loading");
+        
+        try {
+          const resp = await fetch(`${API_BASE}/generate_alternative_ending`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              prompt,
+              world_view,
+              tone,
+              current_path: storyPath,
+              target_outcome: targetOutcome,
+            }),
+          });
+          
+          if (!resp.ok) {
+            const text = await resp.text();
+            throw new Error(`HTTP ${resp.status}: ${text}`);
+          }
+          
+          const data = await resp.json();
+          if (data.error) {
+            throw new Error(data.error);
+          }
+          
+          const newFrames = data.frames || [];
+          const endingType = data.ending_type || targetOutcome;
+          
+          // 创建一个新的"结局分支"展示区域
+          const baseIndex = (currentEpisode.frames || []).length;
+          newFrames.forEach((f, i) => {
+            f.index = baseIndex + i + 1;
+          });
+          
+          // 在现有故事后面追加新结局
+          const alternativeEnding = {
+            ending_type: endingType,
+            frames: newFrames,
+            target_outcome: targetOutcome
+          };
+          
+          // 显示新结局（可以创建一个新的容器，或者追加到现有故事）
+          // 这里我们追加到现有故事，但标记为"另一个结局"
+          currentEpisode.frames = [...currentEpisode.frames, ...newFrames];
+          currentEpisode.choices = []; // 清除选择按钮
+          
+          renderEpisode(currentEpisode);
+          setStatus(`「${endingType}」结局已生成，开始播放…`, "success");
+          
+          // 从新结局开始播放
+          setTimeout(() => {
+            autoPlayAllFrames(baseIndex);
+          }, 500);
+          
+        } catch (err) {
+          console.error(err);
+          setStatus(`生成另一个结局失败: ${err.message}`, "error");
+        }
+      }
+    </script>
+  </body>
+  </html>
+
