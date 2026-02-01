@@ -27,6 +27,32 @@ uvicorn app.main:app --reload
 ```
 
 3. 访问前端，体验简单的 AI 漫剧分镜生成。
+- 页面首先展示的是4个默认的卡片场景
+  <p align="center">
+  <img src="images/P1.jpg" alt="Demo" width="800"/>
+</p>
 
-> 说明：目前代码中的“大模型调用”会以占位实现（假数据），方便先把产品逻辑和数据结构跑通，再接真实模型。
+- 任意点击一个卡片故事，AI会自动生成短格故事，并自动播放
+  <p align="center">
+  <img src="images/P2.jpg" alt="Demo" width="800"/>
+</p>
 
+- 故事播放完毕，点击不同的分支剧情，故事走向不同的结局
+  <p align="center">
+  <img src="images/P3.jpg" alt="Demo" width="800"/>
+</p>
+
+- 继续点击分支故事
+  <p align="center">
+  <img src="images/P4.jpg" alt="Demo" width="800"/>
+</p>
+
+- 继续点击分钟故事
+  <p align="center">
+  <img src="images/P5.jpg" alt="Demo" width="800"/>
+</p>
+
+- 播放中可以随时打断，并且可以语音输入自己想要的场景，故事会迎来不同的结局
+  <p align="center">
+  <img src="images/P6.jpg" alt="Demo" width="800"/>
+</p>
