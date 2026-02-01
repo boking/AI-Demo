@@ -19,9 +19,10 @@ source .venv/bin/activate  # Windows 使用 .venv\\Scripts\\activate
 pip install -r requirements.txt
 ```
 
-2. 启动后端：
+2. 导入KEY并且启动后端：
 
 ```bash
+export OPENROUTER_API_KEY="your KEY"
 uvicorn app.main:app --reload
 点击frontend.html,进入到web页面
 ```
